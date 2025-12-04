@@ -1,0 +1,12 @@
+package com.priyansu.project.lovable_clone.dto.member;
+
+import com.priyansu.project.lovable_clone.enums.ProjectRole;
+
+import java.time.Instant;
+
+public record InviteMemberRequest(
+        String email,
+        ProjectRole role
+
+) {
+}
