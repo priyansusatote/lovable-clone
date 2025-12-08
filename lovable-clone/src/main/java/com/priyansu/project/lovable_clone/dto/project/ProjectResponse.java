@@ -3,12 +3,14 @@ package com.priyansu.project.lovable_clone.dto.project;
 import com.priyansu.project.lovable_clone.dto.auth.UserProfileResponse;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record ProjectResponse(
         Long id,
-        Long name,
-        Instant createdAt,
-        Instant updatedAt,
-        UserProfileResponse owner
+        String name,
+        Boolean isPublic,
+        Long ownerId,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

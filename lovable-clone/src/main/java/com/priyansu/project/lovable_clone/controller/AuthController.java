@@ -8,10 +8,7 @@ import com.priyansu.project.lovable_clone.service.AuthService;
 import com.priyansu.project.lovable_clone.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,16 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class AuthController {
     //DI
-    private AuthService authService;
-    private UserService userService;
+    private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/signup")
-   public ResponseEntity<AuthResponse> signup(SignupRequest request){ // SignupRequest = client input (includes password)  AuthResponse = server output (no password) Two DTOs because request and response fields are different for security.
+   public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request){ // SignupRequest = client input (includes password)  AuthResponse = server output (no password) Two DTOs because request and response fields are different for security.
        return ResponseEntity.ok(authService.singup(request));
    }
 
    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(LoginRequest request){
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(authService.login(request));
    }
 

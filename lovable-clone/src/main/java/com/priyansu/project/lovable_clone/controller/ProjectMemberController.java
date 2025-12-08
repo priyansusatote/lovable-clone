@@ -2,6 +2,7 @@ package com.priyansu.project.lovable_clone.controller;
 
 import com.priyansu.project.lovable_clone.dto.member.InviteMemberRequest;
 import com.priyansu.project.lovable_clone.dto.member.MemberResponse;
+import com.priyansu.project.lovable_clone.dto.member.UpdateMemberRoleRequest;
 import com.priyansu.project.lovable_clone.entity.ProjectMember;
 import com.priyansu.project.lovable_clone.service.ProjectMemberService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ProjectMemberController {
     private final ProjectMemberService projectMemberService;
 
     @GetMapping
-    public ResponseEntity<List<ProjectMember>> getProjectMember(@PathVariable Long projectId){
+    public ResponseEntity<List<MemberResponse>> getProjectMember(@PathVariable Long projectId){
         Long userId = 1L;
         return ResponseEntity.ok(projectMemberService.getProjectMember(projectId, userId));
     }
@@ -31,9 +32,9 @@ public class ProjectMemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> updateMemberRole(@PathVariable Long projectId, @PathVariable Long memberId){
+    public ResponseEntity<MemberResponse> updateMemberRole(@PathVariable Long projectId, @PathVariable Long memberId, @RequestBody UpdateMemberRoleRequest request){
         Long userId = 1L;
-        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, userId));
+        return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request, userId));
     }
 
     @DeleteMapping("/{memberId}")

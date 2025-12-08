@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 
-public class SubscriptionController {
+public class BillingController {
     //DI
     private final SubscriptionService subscriptionService;
     private final PlanService planService;

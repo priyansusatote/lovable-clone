@@ -1,3 +1,19 @@
 spring:
   application:
-    name: lovable-clone
+    name: lovable-clone   # Name of your Spring Boot application
+
+  datasource:
+    url: jdbc:postgresql://localhost:9000/testDB   # PostgreSQL DB URL (Docker port 9000)
+    username: testUser      # DB username
+    password: password      # DB password
+    driver-class-name: org.postgresql.Driver   # PostgreSQL driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update      # Auto-create/update tables based on entities
+    show-sql: true          # Print SQL queries in console
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect   # Hibernate dialect for PostgreSQL
+        format_sql: true    # Pretty-print SQL output (NOTE: Correct spelling is format_sql)
+

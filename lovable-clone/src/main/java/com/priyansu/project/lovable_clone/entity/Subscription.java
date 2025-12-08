@@ -1,9 +1,11 @@
 package com.priyansu.project.lovable_clone.entity;
 
 import com.priyansu.project.lovable_clone.enums.SubscriptionStatus;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
@@ -12,7 +14,10 @@ import java.time.Instant;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
+@AllArgsConstructor
+@NoArgsConstructor
 public class Subscription {
+
 
     Long id;
 

@@ -1,5 +1,9 @@
 package com.priyansu.project.lovable_clone.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,15 +17,16 @@ import java.time.Instant;
 
 public class ProjectFile {
 
+
     Long id;
 
-    Project project; //each file hase to belong with project
+    //Project project; //each file hase to belong with project
 
     String minioObjectKey;
 
-    User createdBy;
+   // User createdBy;
 
-    User updatedBy;
+   // User updatedBy;
 
     Instant createdAt;
     Instant updatedAt;

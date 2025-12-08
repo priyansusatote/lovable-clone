@@ -2,17 +2,16 @@ package com.priyansu.project.lovable_clone.service;
 
 import com.priyansu.project.lovable_clone.dto.member.InviteMemberRequest;
 import com.priyansu.project.lovable_clone.dto.member.MemberResponse;
-import com.priyansu.project.lovable_clone.entity.ProjectMember;
-import org.jspecify.annotations.Nullable;
+import com.priyansu.project.lovable_clone.dto.member.UpdateMemberRoleRequest;
 
 import java.util.List;
 
 public interface ProjectMemberService {
-     List<ProjectMember> getProjectMember(Long projectId, Long userId);
+     List<MemberResponse> getProjectMember(Long projectId, Long userId);
 
      MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId);
 
-     MemberResponse updateMemberRole(Long projectId, Long memberId, Long userId);
+     MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId);
 
      MemberResponse deleteProjectMemberRole(Long projectId, Long memberId, Long userId);
 }
