@@ -10,7 +10,9 @@ public record ProjectResponse(
         String name,
         Boolean isPublic,
         Long ownerId,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        UserProfileResponse owner,
+        Instant createdAt,
+        Instant updatedAt
+
 ) {
 }

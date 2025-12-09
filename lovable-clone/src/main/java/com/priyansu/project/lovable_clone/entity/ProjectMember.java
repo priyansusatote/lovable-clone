@@ -19,21 +19,27 @@ import java.time.Instant;
 @Table(name = "project_members")
 public class ProjectMember {
 
-    @EmbeddedId
+    @EmbeddedId //Composite primary key  of ProjectMemberId's field(projectId + userId) //JPA reads this as: The primary key("id") of this table is a composite key ,from class ProjectMemberId(which contains this both projectId + userId)) //id Would be made using these projectId + userId
     ProjectMemberId id;
 
     @ManyToOne
-    @MapsId("projectId")
+    @MapsId("projectId")  //@MapsId Links the embeddedId field to the relation // connect embedded key to project_id
     Project project;
 
     @ManyToOne
-    @MapsId("userId")
+    @MapsId("userId") // connect embedded key to user_id
     User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     ProjectRole projectRole;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invited_by")
+    private User invitedBy;
+
     Instant invitedAt;
     Instant acceptedAt;
+
+
 }

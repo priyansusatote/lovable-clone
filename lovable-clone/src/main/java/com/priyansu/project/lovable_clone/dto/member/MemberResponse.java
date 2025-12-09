@@ -12,6 +12,7 @@ public record MemberResponse(
         String name,
         String avatarUrl,
         ProjectRole role,
-        Instant invitedAt
+        Instant invitedAt,
+        Long invitedBy
 ) {
 }

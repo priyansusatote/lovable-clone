@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -30,13 +31,20 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectSummeryResponse> getUserProject(Long userId) {
 
-        var projects = projectRepository.findAllByOwnerId(userId);
+        var projects = projectRepository.findAllAccessibleByUser(userId);
         return projectMapper.toProjectResponse(projects);
     }
 
     @Override
     public ProjectResponse getProjectById(Long id, Long userId) {
-        return null;
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("Not authorized");
+        }
+
+        return projectMapper.toResponse(project);
     }
 
     @Override
@@ -61,12 +69,39 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
-        return null;
+    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) { // "request" is dto getting from user
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("Not authorized");
+        }
+
+
+
+        //dto("request Dto")-> Entity
+        project.setName(request.name());
+        project.setIsPublic(request.isPublic());
+
+        //save
+        Project updated = projectRepository.save(project);
+
+        return projectMapper.toResponse(updated); //Entity (updated) -> dto
+
     }
 
     @Override
     public void softDelete(Long id, Long userId) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
+        if (!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("You are Not allowed to Delete");
+        }
+
+        project.setDeletedAt(Instant.now());
+
+        //save
+        projectRepository.save(project);
     }
 }
