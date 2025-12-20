@@ -36,10 +36,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // Only owner can see members list
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized: Only Owner Can");
-        }
+
 
 
         var members = projectMemberRepository.findByProjectId(projectId);  //get all the members stored in the db for this project
@@ -55,11 +52,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         // Only owner can invite
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Only owner can invite");
-        }
+        //pending(Authorization)
 
-        User userToInvite = userRepository.findByEmail(request.email())
+        User userToInvite = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new RuntimeException("User not found with email"));
 
         if(userToInvite.getId().equals(userId)){
@@ -78,7 +73,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .user(userToInvite)
                 .projectRole(request.role())
                 .invitedAt(Instant.now())
-                .invitedBy(project.getOwner())
                 .build();
 
         return projectMemberMapper.toProjectMemberResponseFromMember(projectMemberRepository.save(member));
@@ -91,9 +85,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         // 2️⃣ Check if the logged-in user is the OWNER
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized");
-        }
+      //pending
 
         // 3️⃣ Load the TARGET member (NOT current user)
         ProjectMember member = projectMemberRepository
@@ -117,14 +109,10 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         // 2️⃣ Only owner can remove members
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized");
-        }
+     //pending
 
         // 3️⃣ Owner cannot remove themselves
-        if (memberId.equals(userId)) {
-            throw new RuntimeException("Owner cannot remove themselves");
-        }
+
 
         // 4️⃣ Check if membership exists
         ProjectMember member = projectMemberRepository

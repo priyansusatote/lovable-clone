@@ -4,8 +4,13 @@ import com.priyansu.project.lovable_clone.dto.project.ProjectRequest;
 import com.priyansu.project.lovable_clone.dto.project.ProjectResponse;
 import com.priyansu.project.lovable_clone.dto.project.ProjectSummeryResponse;
 import com.priyansu.project.lovable_clone.entity.Project;
+import com.priyansu.project.lovable_clone.entity.ProjectMember;
+import com.priyansu.project.lovable_clone.entity.ProjectMemberId;
 import com.priyansu.project.lovable_clone.entity.User;
+import com.priyansu.project.lovable_clone.enums.ProjectRole;
+import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
 import com.priyansu.project.lovable_clone.mapper.ProjectMapper;
+import com.priyansu.project.lovable_clone.repository.ProjectMemberRepository;
 import com.priyansu.project.lovable_clone.repository.ProjectRepository;
 import com.priyansu.project.lovable_clone.repository.UserRepository;
 import com.priyansu.project.lovable_clone.service.ProjectService;
@@ -25,7 +30,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
-
+    private final ProjectMemberRepository projectMemberRepository;
 
 
     @Override
@@ -38,11 +43,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse getProjectById(Long id, Long userId) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized");
-        }
+        //only owner can update: Pending
 
         return projectMapper.toResponse(project);
     }
@@ -51,17 +54,28 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse createProject(ProjectRequest request, Long userId) {
         // 1️⃣ Find the owner of the project (throw error if user does not exist)
         User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->new ResourceNotFoundException("user", userId.toString()));
 
         // 2️⃣ Create a new Project entity using the request data
         Project project = Project.builder()
                 .name(request.name())
-                .isPublic(request.isPublic())
-                .owner(owner)
+                .isPublic(false)
                 .build();
 
         // 3️⃣ Save the newly created project into the database
         Project saved = projectRepository.save(project);
+
+        //Whenever a Project is Created a "ProjectMember" also created
+        ProjectMemberId projectMemberId = new  ProjectMemberId(project.getId(), owner.getId());
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(projectMemberId)
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .acceptedAt(Instant.now())
+                .invitedAt(Instant.now())
+                .project(project)
+                .build();
+        projectMemberRepository.save(projectMember);
 
         // 4️⃣ Convert Entity → DTO using MapStruct and return response
         return projectMapper.toResponse(saved);
@@ -71,17 +85,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) { // "request" is dto getting from user
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized");
-        }
-
+       //only owner can update: Pending
 
 
         //dto("request Dto")-> Entity
         project.setName(request.name());
-        project.setIsPublic(request.isPublic());
+
 
         //save
         Project updated = projectRepository.save(project);
@@ -93,11 +104,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void softDelete(Long id, Long userId) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() ->new ResourceNotFoundException("Project", id.toString()));
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("You are Not allowed to Delete");
-        }
+       //only owner can : Pending
 
         project.setDeletedAt(Instant.now());
 

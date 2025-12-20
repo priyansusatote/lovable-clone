@@ -1,6 +1,8 @@
 package com.priyansu.project.lovable_clone.dto.project;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record ProjectRequest(
-        String name,
-        Boolean isPublic) {
+        @NotBlank String name
+        ) {
 }

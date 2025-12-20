@@ -19,7 +19,12 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
-@Table(name = "projects")
+@Table(name = "projects",
+        indexes =  {
+        @Index( name = "idx_projects_updated_at_desc", columnList = "updated_at DESC,  deleted_at"),
+        @Index( name = "idx_project_deleted_at", columnList = "deleted_at")
+        }
+)
 public class Project {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +33,6 @@ public class Project {
     @Column(nullable = false)
     String name;
 
-    // OWNER RELATION
-    @ManyToOne //many project to one user
-    @JoinColumn(name = "owner_id", nullable = false)
-    User owner;
 
     Boolean isPublic = false;
 

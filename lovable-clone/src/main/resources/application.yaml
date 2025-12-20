@@ -17,3 +17,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect   # Hibernate dialect for PostgreSQL
         format_sql: true    # Pretty-print SQL output (NOTE: Correct spelling is format_sql)
 
+jwt:
+  secret-key: asdlkd48fgsefn38ovxg5fsdmf0sfmeakn3mdgmdfg5ggr6feskasdflfedfsfpaow0k
+

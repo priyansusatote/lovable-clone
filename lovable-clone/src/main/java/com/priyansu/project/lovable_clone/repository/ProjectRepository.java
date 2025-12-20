@@ -13,8 +13,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @Query("""
     SELECT DISTINCT p FROM Project p
-    LEFT JOIN ProjectMember pm ON pm.project.id = p.id
-    WHERE (p.owner.id = :userId OR pm.user.id = :userId)
+    JOIN ProjectMember pm ON pm.project.id = p.id
+    WHERE pm.user.id = :userId
       AND p.deletedAt IS NULL
 """)
     List<Project> findAllAccessibleByUser(@Param("userId") Long userId); //@Param is used when you want to bind method parameters to named query parameters.

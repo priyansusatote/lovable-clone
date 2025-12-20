@@ -9,7 +9,6 @@ public record ProjectResponse(
         Long id,
         String name,
         Boolean isPublic,
-        Long ownerId,
         UserProfileResponse owner,
         Instant createdAt,
         Instant updatedAt

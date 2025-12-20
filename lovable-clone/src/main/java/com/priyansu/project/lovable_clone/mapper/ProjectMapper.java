@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
-    @Mapping(source = "owner.id", target = "ownerId")
+
     ProjectResponse toResponse(Project project);   // converts Project (entity) to ProjectResponse (DTO)
 
 

@@ -11,9 +11,8 @@ import java.util.List;
 public interface ProjectMemberMapper {
     //to match source and target field
     @Mapping(source = "user.id",        target = "id")          //user.id means = pm.getUser().getId(),  (pm=projectMember)
-    @Mapping(source = "user.email",     target = "email")      // Entity.user.email → DTO.email
+    @Mapping(source = "user.username",     target = "username")      // Entity.user.email → DTO.email
     @Mapping(source = "user.name",      target = "name")       // Entity.user.name → DTO.name...
-    @Mapping(source = "user.avatarUrl", target = "avatarUrl")
     @Mapping(source = "projectRole",    target = "role")
     @Mapping(source = "invitedAt",      target = "invitedAt")
     @Mapping(source = "invitedBy.id", target = "invitedBy")

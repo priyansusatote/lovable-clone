@@ -5,8 +5,12 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 
 @Getter  //direct shortCut using lombok
 @Setter
@@ -17,16 +21,17 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     String name;
-    String email;
+    String username;
 
-    String passwordHash;
-    String avatarUrl;
+
+    String password;
+
     @CreationTimestamp
     Instant createdAt;
     @UpdateTimestamp
@@ -34,4 +39,8 @@ public class User {
     Instant deletedAt; //soft Delete
 
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
 }

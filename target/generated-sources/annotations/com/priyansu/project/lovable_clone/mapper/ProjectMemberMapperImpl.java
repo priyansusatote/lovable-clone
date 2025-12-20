@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-09T18:33:44+0530",
+    date = "2025-12-20T22:22:18+0530",
     comments = "version: 1.6.0, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
@@ -25,22 +25,22 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
         }
 
         Long id = null;
-        String email = null;
+        String username = null;
         String name = null;
-        String avatarUrl = null;
         ProjectRole role = null;
         Instant invitedAt = null;
         Long invitedBy = null;
 
         id = pmUserId( pm );
-        email = pmUserEmail( pm );
+        username = pmUserUsername( pm );
         name = pmUserName( pm );
-        avatarUrl = pmUserAvatarUrl( pm );
         role = pm.getProjectRole();
         invitedAt = pm.getInvitedAt();
         invitedBy = pmInvitedById( pm );
 
-        MemberResponse memberResponse = new MemberResponse( id, email, name, avatarUrl, role, invitedAt, invitedBy );
+        String avatarUrl = null;
+
+        MemberResponse memberResponse = new MemberResponse( id, username, name, avatarUrl, role, invitedAt, invitedBy );
 
         return memberResponse;
     }
@@ -67,12 +67,12 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
         return user.getId();
     }
 
-    private String pmUserEmail(ProjectMember projectMember) {
+    private String pmUserUsername(ProjectMember projectMember) {
         User user = projectMember.getUser();
         if ( user == null ) {
             return null;
         }
-        return user.getEmail();
+        return user.getUsername();
     }
 
     private String pmUserName(ProjectMember projectMember) {
@@ -81,14 +81,6 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
             return null;
         }
         return user.getName();
-    }
-
-    private String pmUserAvatarUrl(ProjectMember projectMember) {
-        User user = projectMember.getUser();
-        if ( user == null ) {
-            return null;
-        }
-        return user.getAvatarUrl();
     }
 
     private Long pmInvitedById(ProjectMember projectMember) {
