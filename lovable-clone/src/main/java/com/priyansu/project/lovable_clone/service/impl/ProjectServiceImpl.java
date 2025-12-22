@@ -8,11 +8,13 @@ import com.priyansu.project.lovable_clone.entity.ProjectMember;
 import com.priyansu.project.lovable_clone.entity.ProjectMemberId;
 import com.priyansu.project.lovable_clone.entity.User;
 import com.priyansu.project.lovable_clone.enums.ProjectRole;
+import com.priyansu.project.lovable_clone.exception.ForbiddenException;
 import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
 import com.priyansu.project.lovable_clone.mapper.ProjectMapper;
 import com.priyansu.project.lovable_clone.repository.ProjectMemberRepository;
 import com.priyansu.project.lovable_clone.repository.ProjectRepository;
 import com.priyansu.project.lovable_clone.repository.UserRepository;
+import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
@@ -31,30 +33,37 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
     private final ProjectMemberRepository projectMemberRepository;
-
+    private final AuthUtil authUtil;
 
     @Override
-    public List<ProjectSummeryResponse> getUserProject(Long userId) {
+    public List<ProjectSummeryResponse> getUserProject() {
+        Long userId = authUtil.getCurrentUserId();
 
         var projects = projectRepository.findAllAccessibleByUser(userId);
         return projectMapper.toProjectResponse(projects);
     }
 
     @Override
-    public ProjectResponse getProjectById(Long id, Long userId) {
+    public ProjectResponse getProjectById(Long id) {
+        Long userId = authUtil.getCurrentUserId();
+
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
 
-        //only owner can update: Pending
+        projectMemberRepository.findByProjectIdAndUserId(id, userId)
+                .orElseThrow(() -> new ForbiddenException("Not authorized"));
+
 
         return projectMapper.toResponse(project);
     }
 
     @Override
-    public ProjectResponse createProject(ProjectRequest request, Long userId) {
+    public ProjectResponse createProject(ProjectRequest request) {
+        Long userId = authUtil.getCurrentUserId();
+
         // 1️⃣ Find the owner of the project (throw error if user does not exist)
         User owner = userRepository.findById(userId)
-                .orElseThrow(() ->new ResourceNotFoundException("user", userId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("user", userId.toString()));
 
         // 2️⃣ Create a new Project entity using the request data
         Project project = Project.builder()
@@ -66,7 +75,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project saved = projectRepository.save(project);
 
         //Whenever a Project is Created a "ProjectMember" also created
-        ProjectMemberId projectMemberId = new  ProjectMemberId(project.getId(), owner.getId());
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
         ProjectMember projectMember = ProjectMember.builder()
                 .id(projectMemberId)
                 .projectRole(ProjectRole.OWNER)
@@ -83,13 +92,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) { // "request" is dto getting from user
+    public ProjectResponse updateProject(Long id, ProjectRequest request) { // "request" is dto getting from user
+        Long userId = authUtil.getCurrentUserId();
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
 
-       //only owner can update: Pending
+        ProjectMember member =
+                projectMemberRepository.findByProjectIdAndUserId(id, userId)
+                        .orElseThrow(() -> new ForbiddenException("Not authorized"));
 
-
+        if (member.getProjectRole() != ProjectRole.OWNER) {
+            throw new ForbiddenException("Only owner can update project");
+        }
         //dto("request Dto")-> Entity
         project.setName(request.name());
 
@@ -102,11 +116,19 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void softDelete(Long id, Long userId) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException("Project", id.toString()));
+    public void softDelete(Long id) {
+        Long userId = authUtil.getCurrentUserId();
 
-       //only owner can : Pending
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", id.toString()));
+
+        ProjectMember member =
+                projectMemberRepository.findByProjectIdAndUserId(id, userId)
+                        .orElseThrow(() -> new ForbiddenException("Not authorized"));
+
+        if (member.getProjectRole() != ProjectRole.OWNER) {
+            throw new ForbiddenException("Only owner can Delete project");
+        }
 
         project.setDeletedAt(Instant.now());
 
@@ -114,3 +136,4 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(project);
     }
 }
+

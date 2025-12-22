@@ -2,6 +2,7 @@ package com.priyansu.project.lovable_clone.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -47,5 +48,18 @@ public class GlobalExceptionHandler {
         log.error(apiError.toString(), ex);
 
         return ResponseEntity.status(apiError.status()).body(apiError);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ProblemDetail handleForbiddenException(ForbiddenException ex) {
+
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(
+                        HttpStatus.FORBIDDEN,
+                        ex.getMessage()
+                );
+
+        problemDetail.setTitle("Access Denied");
+        return problemDetail;
     }
 }
