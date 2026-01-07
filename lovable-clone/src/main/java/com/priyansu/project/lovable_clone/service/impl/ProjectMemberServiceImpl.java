@@ -18,6 +18,7 @@ import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.service.ProjectMemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -36,6 +37,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     //Get all members list (only if user requesting this list is the owner)
     @Override
+    @PreAuthorize("@securityExpression.canViewMembers(#projectId)")
     public List<MemberResponse> getProjectMember(Long projectId) {
         Long userId = authUtil.getCurrentUserId();
 
@@ -46,9 +48,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .findByProjectIdAndUserId(projectId, userId)
                 .orElseThrow(() -> new ForbiddenException("Not authorized"));
 
-        if (member.getProjectRole() != ProjectRole.OWNER) {
-            throw new ForbiddenException("Only owner can view members");
-        }
+
 
         var members = projectMemberRepository.findByProjectId(projectId);  //get all the members stored in the db for this project
 
@@ -58,19 +58,13 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@securityExpression.canManageMembers(#projectId)")
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
         Long userId = authUtil.getCurrentUserId();
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
 
-        ProjectMember owner = projectMemberRepository
-                .findByProjectIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new ForbiddenException("Not authorized"));
-
-        if (owner.getProjectRole() != ProjectRole.OWNER) {
-            throw new ForbiddenException("Only owner can invite members");
-        }
 
         User userToInvite = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new ResourceNotFoundException("User", request.username()));
@@ -97,6 +91,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@securityExpression.canManageMembers(#projectId)")
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
         Long userId = authUtil.getCurrentUserId();
 
@@ -104,14 +99,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
 
-        // 2️⃣ Check if the logged-in user is the OWNER
-        ProjectMember owner = projectMemberRepository
-                .findByProjectIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new ForbiddenException("Not authorized"));
-
-        if (owner.getProjectRole() != ProjectRole.OWNER) {
-            throw new ForbiddenException("Only owner can update roles");
-        }
 
         //owner cannot downgrade their role
         if (memberId.equals(userId)) {
@@ -134,6 +121,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@securityExpression.canManageMembers(#projectId)")
     public void removeProjectMemberRole(Long projectId, Long memberId) {
         Long userId = authUtil.getCurrentUserId();
 

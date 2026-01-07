@@ -15,7 +15,6 @@ public interface ProjectMemberMapper {
     @Mapping(source = "user.name",      target = "name")       // Entity.user.name → DTO.name...
     @Mapping(source = "projectRole",    target = "role")
     @Mapping(source = "invitedAt",      target = "invitedAt")
-    @Mapping(source = "invitedBy.id", target = "invitedBy")
     MemberResponse toProjectMemberResponseFromMember(ProjectMember pm);
 
     List<MemberResponse> toMemberResponseListFromProjectMember(List<ProjectMember> members);

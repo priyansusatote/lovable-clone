@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-20T22:22:18+0530",
+    date = "2026-01-07T22:25:54+0530",
     comments = "version: 1.6.0, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
@@ -29,18 +29,16 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
         String name = null;
         ProjectRole role = null;
         Instant invitedAt = null;
-        Long invitedBy = null;
 
         id = pmUserId( pm );
         username = pmUserUsername( pm );
         name = pmUserName( pm );
         role = pm.getProjectRole();
         invitedAt = pm.getInvitedAt();
-        invitedBy = pmInvitedById( pm );
 
         String avatarUrl = null;
 
-        MemberResponse memberResponse = new MemberResponse( id, username, name, avatarUrl, role, invitedAt, invitedBy );
+        MemberResponse memberResponse = new MemberResponse( id, username, name, avatarUrl, role, invitedAt );
 
         return memberResponse;
     }
@@ -81,13 +79,5 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
             return null;
         }
         return user.getName();
-    }
-
-    private Long pmInvitedById(ProjectMember projectMember) {
-        User invitedBy = projectMember.getInvitedBy();
-        if ( invitedBy == null ) {
-            return null;
-        }
-        return invitedBy.getId();
     }
 }

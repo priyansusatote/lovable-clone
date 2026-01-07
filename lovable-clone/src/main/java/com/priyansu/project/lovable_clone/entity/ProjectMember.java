@@ -34,9 +34,7 @@ public class ProjectMember {
     @Column(nullable = false)
     ProjectRole projectRole;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invited_by")
-    private User invitedBy;
+   //removed invitedBy
 
     Instant invitedAt;
     Instant acceptedAt;
