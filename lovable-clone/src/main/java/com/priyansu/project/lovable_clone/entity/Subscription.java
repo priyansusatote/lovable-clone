@@ -1,12 +1,11 @@
 package com.priyansu.project.lovable_clone.entity;
 
 import com.priyansu.project.lovable_clone.enums.SubscriptionStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -16,25 +15,35 @@ import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Entity
 public class Subscription {
 
-
+    @Id
+            @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)  //(many Subscription have by one User)        user can have manySubscription
+    @JoinColumn(nullable = false, name = "user_id")
     User user; //each subscription can have 1 user
 
+    @ManyToOne(fetch = FetchType.LAZY)     //many subscription is part on one plan
+    @JoinColumn(nullable = false, name = "plan_id")
     Plan plan;
 
+    @Enumerated(EnumType.STRING)
     SubscriptionStatus status;
 
 
-    String stripeSubscriptionId;
+    String stripeSubscriptionId;  //also called as "gatewaySubscriptionId"
 
     Instant currentPeriodStart;
     Instant currentPeriodEnd;
     Boolean cancelAtPeriodEnd;
 
+    @CreationTimestamp
     Instant createdAt;
+    @UpdateTimestamp
     Instant updatedAt;
 
 

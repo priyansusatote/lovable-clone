@@ -12,10 +12,11 @@ public record SubscriptionResponse(
 
         String status,
 
-        Instant periodEnd,
+        Instant currentPeriodEnd,
 
         Long tokenUsedThisCycle
 
 
 ) {
+
 }
