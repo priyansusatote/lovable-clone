@@ -29,4 +29,12 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Pr
             @Param("pId") Long projectId,          //@param used to pass/match field name in Query( :projectId or :pId)
             @Param("uId") Long userId
     );
+
+
+
+    @Query("""
+            SELECT COUNT(pm) FROM ProjectMember pm
+            WHERE pm.id.userId = :userId AND pm.role = 'OWNER'
+            """)
+    int countProjectOwnedByUser(@Param("userId") Long userId);
 }

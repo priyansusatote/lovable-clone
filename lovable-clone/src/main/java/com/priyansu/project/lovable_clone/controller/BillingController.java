@@ -60,7 +60,6 @@ public class BillingController {
 
     @PostMapping("/api/payments/portal")
     public ResponseEntity<PortalResponse> openCustomerPortal(){
-        Long userId = 1L;
         return ResponseEntity.ok(paymentProcessor.openCustomerPortal());
     }
 

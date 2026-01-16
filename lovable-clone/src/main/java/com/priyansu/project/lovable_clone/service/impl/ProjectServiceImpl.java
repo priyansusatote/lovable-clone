@@ -8,6 +8,7 @@ import com.priyansu.project.lovable_clone.entity.ProjectMember;
 import com.priyansu.project.lovable_clone.entity.ProjectMemberId;
 import com.priyansu.project.lovable_clone.entity.User;
 import com.priyansu.project.lovable_clone.enums.ProjectRole;
+import com.priyansu.project.lovable_clone.exception.BadRequestException;
 import com.priyansu.project.lovable_clone.exception.ForbiddenException;
 import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
 import com.priyansu.project.lovable_clone.mapper.ProjectMapper;
@@ -17,6 +18,7 @@ import com.priyansu.project.lovable_clone.repository.UserRepository;
 import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.security.SecurityExpression;
 import com.priyansu.project.lovable_clone.service.ProjectService;
+import com.priyansu.project.lovable_clone.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
     private final ProjectMemberRepository projectMemberRepository;
+    private final SubscriptionService subscriptionService;
     private final AuthUtil authUtil;
 
 
@@ -63,6 +66,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
+        //authorization
+        if(!subscriptionService.canCreateNewProject()){
+           throw  new BadRequestException("You are not allowed to create a new project with current Plan Upgrade now");
+        }
+
         Long userId = authUtil.getCurrentUserId();
 
         // 1️⃣  the owner of the project (this is only for setting projectMember.user(owner) //Use getReferenceById() when you only need the entity to form a relationship, not its data.

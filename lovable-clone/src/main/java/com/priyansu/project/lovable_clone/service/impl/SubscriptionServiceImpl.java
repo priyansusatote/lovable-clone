@@ -1,9 +1,6 @@
 package com.priyansu.project.lovable_clone.service.impl;
 
 import com.priyansu.project.lovable_clone.dto.SubscriptionResponse;
-import com.priyansu.project.lovable_clone.dto.subscription.CheckoutRequest;
-import com.priyansu.project.lovable_clone.dto.subscription.CheckoutResponse;
-import com.priyansu.project.lovable_clone.dto.subscription.PortalResponse;
 import com.priyansu.project.lovable_clone.entity.Plan;
 import com.priyansu.project.lovable_clone.entity.Subscription;
 import com.priyansu.project.lovable_clone.entity.User;
@@ -11,11 +8,14 @@ import com.priyansu.project.lovable_clone.enums.SubscriptionStatus;
 import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
 import com.priyansu.project.lovable_clone.mapper.SubscriptionMapper;
 import com.priyansu.project.lovable_clone.repository.PlanRepository;
+import com.priyansu.project.lovable_clone.repository.ProjectMemberRepository;
 import com.priyansu.project.lovable_clone.repository.SubscriptionRepository;
 import com.priyansu.project.lovable_clone.repository.UserRepository;
 import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.service.SubscriptionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,6 +23,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final AuthUtil authUtil;
@@ -30,6 +31,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final Integer FREE_TIER_PROJECTS_ALLOWED = 1;
 
     @Override
     public SubscriptionResponse getCurrentSubscription() {
@@ -65,12 +68,58 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void updateSubscription(String subscriptionId, SubscriptionStatus status, Instant periodStart, Instant periodEnd, Boolean cancelAtPeriodEnd, Long planId) {
+    @Transactional
+    public void updateSubscription(String gatewaySubscriptionId, SubscriptionStatus status, Instant periodStart, Instant periodEnd, Boolean cancelAtPeriodEnd, Long planId) {
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
+
+        boolean hasSubscriptionUpdated = false;   //flag
+
+        if(status != null && status != subscription.getStatus() ) { //means it is changed/updated
+            subscription.setStatus(status);
+
+            hasSubscriptionUpdated = true;
+        }
+
+        if(periodStart != null && !periodStart.equals(subscription.getCurrentPeriodStart())) {
+            subscription.setCurrentPeriodStart(periodStart);
+
+            hasSubscriptionUpdated = true;
+        }
+
+        if(periodEnd != null && !periodEnd.equals(subscription.getCurrentPeriodEnd())) {
+            subscription.setCurrentPeriodEnd(periodEnd);
+
+            hasSubscriptionUpdated = true;
+        }
+
+        if(cancelAtPeriodEnd != null && cancelAtPeriodEnd != subscription.getCancelAtPeriodEnd()) {
+            subscription.setCancelAtPeriodEnd(cancelAtPeriodEnd);
+
+            hasSubscriptionUpdated = true;
+        }
+
+        if(planId != null && !planId.equals(subscription.getPlan().getId())) {
+            Plan plan = getPlan(planId);
+            subscription.setPlan(plan);
+
+            hasSubscriptionUpdated = true;
+        }
+
+        if(hasSubscriptionUpdated) {
+            log.debug("Subscription has been updated: {}", gatewaySubscriptionId);
+            subscriptionRepository.save(subscription);
+        }
+
 
     }
 
     @Override
-    public void cancelSubscription(String subscriptionId) {
+    public void cancelSubscription(String gatewaySubscriptionId) {
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
+
+        subscription.setStatus(SubscriptionStatus.CANCELLED);
+
+        subscriptionRepository.save(subscription);
 
     }
 
@@ -89,7 +138,35 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void markSubscriptionPastDue(String gatewaySubscriptionId) {
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
 
+        if(subscription.getStatus() == SubscriptionStatus.PAST_DUE) {
+            log.debug("Subscription is Already Past Due, {}", gatewaySubscriptionId);
+            return;
+        }
+
+        subscription.setStatus(SubscriptionStatus.PAST_DUE);
+        subscriptionRepository.save(subscription);
+
+        //Notify user Via email...
+    }
+
+
+
+    @Override
+    public boolean canCreateNewProject() {
+        SubscriptionResponse currentSubscription = getCurrentSubscription();
+
+        long userId = authUtil.getCurrentUserId();
+
+        int countOfOwnedProjects = projectMemberRepository.countProjectOwnedByUser(userId);
+
+
+        if(currentSubscription.plan() == null){
+            return countOfOwnedProjects < FREE_TIER_PROJECTS_ALLOWED;
+        }
+
+        return countOfOwnedProjects < currentSubscription.plan().maxProjects();
     }
 
 

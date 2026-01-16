@@ -6,6 +6,7 @@ import com.priyansu.project.lovable_clone.dto.subscription.PortalResponse;
 import com.priyansu.project.lovable_clone.entity.Plan;
 import com.priyansu.project.lovable_clone.entity.User;
 import com.priyansu.project.lovable_clone.enums.SubscriptionStatus;
+import com.priyansu.project.lovable_clone.exception.BadRequestException;
 import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
 import com.priyansu.project.lovable_clone.repository.PlanRepository;
 import com.priyansu.project.lovable_clone.repository.UserRepository;
@@ -86,8 +87,28 @@ public class StripePaymentProcessorImpl implements PaymentProcessor {
 
     @Override
     public PortalResponse openCustomerPortal() {
+        Long userId = authUtil.getCurrentUserId();
+        User user = getUser(userId);
+        String stripeCustomerId = user.getStripeCustomerId();
 
-        return null;
+        if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
+            throw new BadRequestException("User does not have a StripeCustomerId, userId: " + userId);
+        }
+
+        try {
+            var portalSession = com.stripe.model.billingportal.Session.create(
+                    com.stripe.param.billingportal.SessionCreateParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setReturnUrl(frontendUrl)
+                            .build()
+            );
+            return new PortalResponse(portalSession.getUrl());
+
+        } catch (StripeException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     @Override
@@ -103,7 +124,7 @@ public class StripePaymentProcessorImpl implements PaymentProcessor {
                     handleCustomerSubscriptionDeleted((Subscription) stripeObject);  //when subscription ends, Revoke the Access
             case "invoice.paid" -> handleInvoicePaid((Invoice) stripeObject);      //when invoice paid
             case "invoice.payment_failed" ->
-                    handleInvoicePaymentFailed((Invoice) stripeObject);   //when invoice is not paid, mark ad PAST_DUE
+                    handleInvoicePaymentFailed((Invoice) stripeObject);   //when invoice is not paid, just mark ad PAST_DUE ,no action
             default -> log.debug("Ignoring the event: {}", type); //all rest of the event ignored
         }
     }
@@ -115,7 +136,7 @@ public class StripePaymentProcessorImpl implements PaymentProcessor {
             return;
         }
 
-        Long userId = Long.parseLong(metadata.get("user_Id"));
+        Long userId = Long.parseLong(metadata.get("user_id"));
         Long planId = Long.parseLong(metadata.get("plan_id"));
 
         String subscriptionId = session.getSubscription();
@@ -189,7 +210,6 @@ public class StripePaymentProcessorImpl implements PaymentProcessor {
         if (subId == null) return;
 
         subscriptionService.markSubscriptionPastDue(subId);
-
     }
 
 
