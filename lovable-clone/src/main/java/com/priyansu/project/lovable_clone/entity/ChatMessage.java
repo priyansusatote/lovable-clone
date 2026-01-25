@@ -2,32 +2,46 @@ package com.priyansu.project.lovable_clone.entity;
 
 
 import com.priyansu.project.lovable_clone.enums.MessageRole;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
+@Entity
+@Table(name = "chat_messages")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level =  AccessLevel.PRIVATE)
 
 public class ChatMessage {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false),
+            @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    })
     ChatSession charSession;
+
+    @Column(columnDefinition = "text", nullable = false)
     String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     MessageRole role;
 
-    String  toolCalls;     //JSON Array of Tools Called
 
     Integer tokenUsed;
+
+    @CreationTimestamp
     Instant createdAt;
 
 }

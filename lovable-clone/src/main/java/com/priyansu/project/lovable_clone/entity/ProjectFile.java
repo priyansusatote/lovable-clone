@@ -1,33 +1,39 @@
 package com.priyansu.project.lovable_clone.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
+@Builder
+@Entity
+@Table(name = "project_files")
 public class ProjectFile {
 
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    //Project project; //each file hase to belong with project
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    Project project; //each file has to belong with project
+    
+    String minioObjectKey;  //help to locate file
 
-    String minioObjectKey;
+    @Column(nullable = false)
+    String path;
 
-   // User createdBy;
-
-   // User updatedBy;
-
+    @CreationTimestamp
     Instant createdAt;
+    @UpdateTimestamp
     Instant updatedAt;
 }

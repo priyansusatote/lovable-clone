@@ -1,30 +1,44 @@
 package com.priyansu.project.lovable_clone.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
+@Entity
+@Table(name = "chat_sessions")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level =  AccessLevel.PRIVATE)
 
 public class ChatSession {
 
+    @EmbeddedId
+    ChatSessionId id; // has projectId, userId (both are Uniquely identifies) ,  PK is (project_id, user_id)
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId("projectId") //FK (Points to a row in another table's PK)
+    @JoinColumn(name = "project_id", nullable = false, updatable = false)
     Project project;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId("userId") //FK (Points to a row in another table's PK)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     User user;
 
-    String title;
 
+    @CreationTimestamp
+    @Column(nullable = false ,updatable = false)
     Instant createdAt;
+
+    @UpdateTimestamp
     Instant updatedAt;
+
     Instant deletedAt;
 }

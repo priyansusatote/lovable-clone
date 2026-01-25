@@ -2,11 +2,12 @@ spring:
   application:
     name: lovable-clone   # Name of your Spring Boot application
 
+
   datasource:
-    url: jdbc:postgresql://localhost:9000/testDB   # PostgreSQL DB URL (Docker port 9000)
-    username: testUser      # DB username
-    password: password      # DB password
-    driver-class-name: org.postgresql.Driver   # PostgreSQL driver
+    url: jdbc:postgresql://localhost:9010/pgvector-test  # PostgreSQL DB URL (Docker port
+    username: user   # DB username
+    password: password     # DB password
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -16,6 +17,16 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect   # Hibernate dialect for PostgreSQL
         format_sql: true    # Pretty-print SQL output (NOTE: Correct spelling is format_sql)
+
+  ai:
+    openai:
+      api-key: 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
+      base-url: https://openrouter.ai/api
+      chat:
+        options:
+          model: qwen/qwen3-coder:free
+          temperature: 0.0
+
 
 jwt:
   secret-key: asdlkd48fgsefn38ovxg5fsdmf0sfmeakn3mdgmdfg5ggr6feskasdflfedfsfpaow0k
@@ -28,3 +39,17 @@ stripe:
 
 
 client.url: http://localhost:8080               #front-End url (temporary-localhost)
+
+
+logging:
+  level:
+    org.springframework.ai:
+      chat.client: DEBUG
+
+
+
+minio:
+  url: http://localhost:9000          # or minio:9000 if inside docker network
+  access-key: minioadmin
+  secret-key: minioadmin123
+  project-bucket: projects

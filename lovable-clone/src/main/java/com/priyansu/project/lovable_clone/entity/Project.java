@@ -41,7 +41,7 @@ public class Project {
     @UpdateTimestamp
     Instant updatedAt;
 
-    Instant deletedAt;
+    Instant deletedAt;  //soft delete
 
    // @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
    // private List<ProjectMember> members = new ArrayList<>();
