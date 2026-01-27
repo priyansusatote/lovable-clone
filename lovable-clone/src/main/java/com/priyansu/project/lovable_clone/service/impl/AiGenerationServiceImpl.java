@@ -1,6 +1,8 @@
 package com.priyansu.project.lovable_clone.service.impl;
 
 import com.priyansu.project.lovable_clone.llm.PromptUtils;
+import com.priyansu.project.lovable_clone.llm.advisors.FileTreeContextAdvisor;
+import com.priyansu.project.lovable_clone.llm.tools.CodeGenerationTools;
 import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.service.AiGenerationService;
 import com.priyansu.project.lovable_clone.service.ProjectFileService;
@@ -25,6 +27,7 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     private final ChatClient chatClient;
     private final AuthUtil authUtil;
     private final ProjectFileService projectFileService;
+    private final FileTreeContextAdvisor fileTreeContextAdvisor;
 
     private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>", Pattern.DOTALL);
 
@@ -41,11 +44,15 @@ public class AiGenerationServiceImpl implements AiGenerationService {
 
         StringBuilder fullResponseBuffer = new StringBuilder();
 
+        CodeGenerationTools codeGenerationTools = new CodeGenerationTools(projectFileService, projectId);
+
         return chatClient.prompt()
-                .system(PromptUtils.CODE_GENERATION_SYSTEM_PROMPT)
+                .system(PromptUtils.CODE_GENERATION_SYSTEM_PROMPT) //can also Pass FileTree by just: +projectFileService.getFileTree(projectId) , but following convection
                 .user(userPrompt)
+                .tools(codeGenerationTools)  //our tool to readFile content
                 .advisors(advisorSpec -> {
                             advisorSpec.params(advisorParams);
+                            advisorSpec.advisors(fileTreeContextAdvisor); //our custom Advisor (to pass FileTree) we can do it without custom Advisor by just passing fileTree With SystemPrompt (but following best Practices)
                         }
                 )
                 .stream()

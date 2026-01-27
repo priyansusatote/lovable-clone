@@ -20,16 +20,16 @@ spring:
 
   ai:
     openai:
-      api-key: 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
+      api-key: ${LOVABLE_OPENROUTER_API_KEY}
       base-url: https://openrouter.ai/api
       chat:
         options:
-          model: qwen/qwen3-coder:free
+          model: x-ai/grok-code-fast-1
           temperature: 0.0
 
 
 jwt:
-  secret-key: asdlkd48fgsefn38ovxg5fsdmf0sfmeakn3mdgmdfg5ggr6feskasdflfedfsfpaow0k
+  secret-key: ${LOVABLE_JWT_SECRET}
 
 stripe:
   api:

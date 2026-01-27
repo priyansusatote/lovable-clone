@@ -292,6 +292,13 @@ public class PromptUtils {
                                         6. **Semantic classes only** - Never use `bg-white`, `text-black`, etc.
                                         7. **Multiple small files** - Better than one large file
                                         8. **Complete implementations** - No placeholders or TODO comments
+                                        9. **Page Export Contract (CRITICAL)** \s
+                                           - All files under `src/pages/**` MUST use **default exports only**. \s
+                                           - Never use named exports (`export {}`) in page files. \s
+                                           - When importing page components, ALWAYS use default import syntax \s
+                                             (❌ `import { Page }` → ✅ `import Page`). \s
+                                           - This rule overrides any stylistic preference and must never be violated.
+            
             
                                         ## Libraries Available
                                         **Core**: react, react-dom, typescript, vite

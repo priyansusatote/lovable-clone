@@ -9,17 +9,22 @@ import com.priyansu.project.lovable_clone.mapper.ProjectFileMapper;
 import com.priyansu.project.lovable_clone.repository.ProjectFileRepository;
 import com.priyansu.project.lovable_clone.repository.ProjectRepository;
 import com.priyansu.project.lovable_clone.service.ProjectFileService;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.List;
 
@@ -33,11 +38,13 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     private final MinioClient minioClient;
     private final ProjectFileMapper projectFileMapper;
 
-    @Value("${minio.project-bucket")
+    @Value("${minio.project-bucket}")
     private String projectBucket;
 
+    private static final String BUCKET_NAME = "projects";
+
     @Override
-    public List<FileNode> getFileTree(Long projectId, Long userId) {
+    public List<FileNode> getFileTree(Long projectId) {
 
         List<ProjectFile> projectFileList = projectFileRepository.findByProjectId(projectId);
 
@@ -45,9 +52,26 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     }
 
     @Override
-    public FileContentResponse getFileContent(Long projectId, String path, Long userId) {
-        return null;
+    public FileContentResponse getFileContent(Long projectId, String path) {
+        String objectName = projectId + "/" + path;  //creating obj name by combining projectId and path :ex: 23/src/App.tsx
+
+        
+        try (
+            InputStream is = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(BUCKET_NAME)
+                            .object(objectName)
+                            .build())){
+
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            return new FileContentResponse(content, path);
+
+        } catch (Exception e) {
+            log.error("Failed to read file: {}/{}", projectId, path, e);
+            throw new RuntimeException("Failed to read file content: ", e);
+        }
     }
+
 
     @Override //path =  filePath, content = fileContent
     public void saveFile(Long projectId, String path, String content) { //Save the file MetaData in Postgres //Save the content in minio

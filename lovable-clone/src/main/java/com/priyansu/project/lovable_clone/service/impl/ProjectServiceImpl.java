@@ -18,6 +18,7 @@ import com.priyansu.project.lovable_clone.repository.UserRepository;
 import com.priyansu.project.lovable_clone.security.AuthUtil;
 import com.priyansu.project.lovable_clone.security.SecurityExpression;
 import com.priyansu.project.lovable_clone.service.ProjectService;
+import com.priyansu.project.lovable_clone.service.ProjectTemplateService;
 import com.priyansu.project.lovable_clone.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
     private final SubscriptionService subscriptionService;
     private final AuthUtil authUtil;
+    private final ProjectTemplateService projectTemplateService;
 
 
     @Override
@@ -85,6 +87,9 @@ public class ProjectServiceImpl implements ProjectService {
 
         // 3️⃣ Save the newly created project into the database
         Project saved = projectRepository.save(project);
+
+        //initialize starter project to the new created project (create a copy of template)
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
 
         //Whenever a Project is Created a "ProjectMember" also created
         ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), userId);
