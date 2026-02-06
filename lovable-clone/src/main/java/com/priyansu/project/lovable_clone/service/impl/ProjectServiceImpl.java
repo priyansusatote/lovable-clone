@@ -47,23 +47,25 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectSummeryResponse> getUserProject() {
         Long userId = authUtil.getCurrentUserId();
 
-        var projects = projectRepository.findAllAccessibleByUser(userId);
-        return projectMapper.toProjectResponse(projects);
+        var projectWithRoles = projectRepository.findAllAccessibleByUser(userId);
+        return projectWithRoles.stream() //map one by one projectWithRoles in to List of Response
+                .map(p -> projectMapper.toProjectSummeryResponse(p.getProject(), p.getRole()))
+                .toList();
     }
 
     @Override
     @PreAuthorize("@securityExpression.canViewProject(#projectId)") //first S->s should be always lower even Bean/className is not
-    public ProjectResponse getProjectById(Long projectId) {
+    public ProjectSummeryResponse getProjectById(Long projectId) {
         Long userId = authUtil.getCurrentUserId();
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
+        var projectWithRole = projectRepository.findAccessibleProjectByIdWithRole(projectId, userId)
+                .orElseThrow(() -> new BadRequestException("Project with id " + projectId + " not found"));
 
 /*       projectMemberRepository.findByProjectIdAndUserId(id, userId)
                .orElseThrow(() -> new ForbiddenException("Not authorized")); */   //service level Authorization check removed already done using method security @PreAuthrize
 
 
-        return projectMapper.toResponse(project);
+        return projectMapper.toProjectSummeryResponse(projectWithRole.getProject() , projectWithRole.getRole() );
     }
 
     @Override

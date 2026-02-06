@@ -4,6 +4,7 @@ import com.priyansu.project.lovable_clone.dto.auth.UserProfileResponse;
 import com.priyansu.project.lovable_clone.dto.project.ProjectResponse;
 import com.priyansu.project.lovable_clone.dto.project.ProjectSummeryResponse;
 import com.priyansu.project.lovable_clone.entity.Project;
+import com.priyansu.project.lovable_clone.enums.ProjectRole;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-26T18:20:43+0530",
-    comments = "version: 1.6.0, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
+    date = "2026-02-05T15:38:30+0530",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
 public class ProjectMapperImpl implements ProjectMapper {
@@ -41,6 +42,30 @@ public class ProjectMapperImpl implements ProjectMapper {
         ProjectResponse projectResponse = new ProjectResponse( id, name, isPublic, owner, createdAt, updatedAt );
 
         return projectResponse;
+    }
+
+    @Override
+    public ProjectSummeryResponse toProjectSummeryResponse(Project project, ProjectRole role) {
+        if ( project == null && role == null ) {
+            return null;
+        }
+
+        Long id = null;
+        String name = null;
+        Instant createdAt = null;
+        Instant updatedAt = null;
+        if ( project != null ) {
+            id = project.getId();
+            name = project.getName();
+            createdAt = project.getCreatedAt();
+            updatedAt = project.getUpdatedAt();
+        }
+        ProjectRole role1 = null;
+        role1 = role;
+
+        ProjectSummeryResponse projectSummeryResponse = new ProjectSummeryResponse( id, name, createdAt, updatedAt, role1 );
+
+        return projectSummeryResponse;
     }
 
     @Override
@@ -72,7 +97,9 @@ public class ProjectMapperImpl implements ProjectMapper {
         createdAt = project.getCreatedAt();
         updatedAt = project.getUpdatedAt();
 
-        ProjectSummeryResponse projectSummeryResponse = new ProjectSummeryResponse( id, name, createdAt, updatedAt );
+        ProjectRole role = null;
+
+        ProjectSummeryResponse projectSummeryResponse = new ProjectSummeryResponse( id, name, createdAt, updatedAt, role );
 
         return projectSummeryResponse;
     }

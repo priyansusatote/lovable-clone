@@ -35,7 +35,10 @@ public class ProjectMemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> updateMemberRole(@PathVariable Long projectId, @PathVariable Long memberId, @RequestBody @Valid UpdateMemberRoleRequest request){
+    public ResponseEntity<MemberResponse> updateMemberRole(
+            @PathVariable Long projectId,
+            @PathVariable Long memberId,
+            @RequestBody @Valid UpdateMemberRoleRequest request){
 
         return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request));
     }

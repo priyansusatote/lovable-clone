@@ -1,27 +1,43 @@
 package com.priyansu.project.lovable_clone.repository;
 
 import com.priyansu.project.lovable_clone.entity.Project;
+import com.priyansu.project.lovable_clone.enums.ProjectRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    //EXISTS(written here) explained:“Does there exist any row in ProjectMember where this user is a member of this project?”
-    //SELECT 1 is just a dummy value. The database ignores it. SELECT 1 = “I don’t want data, just confirmation.” , Why not SELECT pm or SELECT *? : The database does not return data ,It only checks: “Is there at least one matching row?”
     @Query("""
-              SELECT p FROM Project p
-              WHERE p.deletedAt IS NULL
-              AND EXISTS (  
-                     SELECT 1 FROM ProjectMember pm   
-                     WHERE pm.id.userId = :userId
-                     AND pm.id.projectId = p.id
-               )
-               ORDER BY p.updatedAt DESC
+            SELECT p as project, pm.projectRole as role
+            FROM Project p
+            JOIN ProjectMember pm ON pm.project.id = p.id
+            WHERE pm.user.id = :userId
+              AND p.deletedAt IS NULL
+            ORDER BY p.updatedAt DESC
             """)
-    List<Project> findAllAccessibleByUser(@Param("userId") Long userId); //@Param is used when you want to bind method parameters to named query parameters.
+    List<ProjectWithRole> findAllAccessibleByUser(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT p as project, pm.projectRole as role
+            FROM Project p
+            JOIN ProjectMember pm ON pm.project.id = p.id
+            WHERE p.id = :projectId
+              AND pm.user.id = :userId
+              AND p.deletedAt IS NULL
+            """)
+    Optional<ProjectWithRole> findAccessibleProjectByIdWithRole(@Param("projectId") Long projectId,
+                                                                @Param("userId") Long userId);
+
+
+    interface ProjectWithRole {
+        Project getProject();
+
+        ProjectRole getRole();
+    }
 }

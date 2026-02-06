@@ -2,6 +2,7 @@ package com.priyansu.project.lovable_clone.service.impl;
 
 import com.priyansu.project.lovable_clone.dto.project.FileContentResponse;
 import com.priyansu.project.lovable_clone.dto.project.FileNode;
+import com.priyansu.project.lovable_clone.dto.project.FileTreeResponse;
 import com.priyansu.project.lovable_clone.entity.Project;
 import com.priyansu.project.lovable_clone.entity.ProjectFile;
 import com.priyansu.project.lovable_clone.exception.ResourceNotFoundException;
@@ -44,11 +45,13 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     private static final String BUCKET_NAME = "projects";
 
     @Override
-    public List<FileNode> getFileTree(Long projectId) {
+    public FileTreeResponse getFileTree(Long projectId) {
 
         List<ProjectFile> projectFileList = projectFileRepository.findByProjectId(projectId);
 
-        return projectFileMapper.toListOfFileNode(projectFileList);
+        List<FileNode> projectFileNodes = projectFileMapper.toListOfFileNode(projectFileList);
+
+        return new  FileTreeResponse(projectFileNodes);
     }
 
     @Override
@@ -64,7 +67,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
                             .build())){
 
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            return new FileContentResponse(content, path);
+            return new FileContentResponse(path, content);
 
         } catch (Exception e) {
             log.error("Failed to read file: {}/{}", projectId, path, e);

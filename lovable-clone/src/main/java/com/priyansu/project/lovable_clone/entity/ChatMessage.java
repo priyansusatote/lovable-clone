@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "chat_messages")
@@ -29,15 +30,18 @@ public class ChatMessage {
             @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false),
             @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     })
-    ChatSession charSession;
+    ChatSession chatSession;
 
-    @Column(columnDefinition = "text", nullable = false)
+    @Column(columnDefinition = "text")
     String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     MessageRole role;
 
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL,  fetch = FetchType.LAZY)
+    @OrderBy("sequenceOrder ASC")  //events order based by sequenceOrder's order
+    List<ChatEvent> events;
 
     Integer tokenUsed;
 

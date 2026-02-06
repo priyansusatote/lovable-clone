@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-26T18:20:43+0530",
-    comments = "version: 1.6.0, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
+    date = "2026-02-05T15:38:30+0530",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
 )
 @Component
 public class ProjectMemberMapperImpl implements ProjectMemberMapper {
@@ -24,21 +24,19 @@ public class ProjectMemberMapperImpl implements ProjectMemberMapper {
             return null;
         }
 
-        Long id = null;
+        Long userId = null;
         String username = null;
         String name = null;
         ProjectRole role = null;
         Instant invitedAt = null;
 
-        id = pmUserId( pm );
+        userId = pmUserId( pm );
         username = pmUserUsername( pm );
         name = pmUserName( pm );
         role = pm.getProjectRole();
         invitedAt = pm.getInvitedAt();
 
-        String avatarUrl = null;
-
-        MemberResponse memberResponse = new MemberResponse( id, username, name, avatarUrl, role, invitedAt );
+        MemberResponse memberResponse = new MemberResponse( userId, username, name, role, invitedAt );
 
         return memberResponse;
     }

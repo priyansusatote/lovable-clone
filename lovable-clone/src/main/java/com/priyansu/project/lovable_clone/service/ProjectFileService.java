@@ -2,11 +2,12 @@ package com.priyansu.project.lovable_clone.service;
 
 import com.priyansu.project.lovable_clone.dto.project.FileContentResponse;
 import com.priyansu.project.lovable_clone.dto.project.FileNode;
+import com.priyansu.project.lovable_clone.dto.project.FileTreeResponse;
 
 import java.util.List;
 
 public interface ProjectFileService {
-     List<FileNode> getFileTree(Long projectId);
+     FileTreeResponse getFileTree(Long projectId);
 
      FileContentResponse getFileContent(Long projectId, String path);
 

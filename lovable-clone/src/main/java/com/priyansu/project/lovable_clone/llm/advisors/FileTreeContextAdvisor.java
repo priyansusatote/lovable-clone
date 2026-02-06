@@ -62,7 +62,7 @@ public class FileTreeContextAdvisor implements StreamAdvisor {
         }
 
 
-        List<FileNode> fileTree = projectFileService.getFileTree(projectId);
+        List<FileNode> fileTree = projectFileService.getFileTree(projectId).files();
         String fileTreeContext = "\n\n ---- FILE_TREE ----\n" + fileTree.toString();  //to divide in another section (easier for LLM)
 
         // (add file-tree)

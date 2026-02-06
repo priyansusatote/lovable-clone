@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProjectMemberMapper {
     //to match source and target field
-    @Mapping(source = "user.id",        target = "id")          //user.id means = pm.getUser().getId(),  (pm=projectMember)
+    @Mapping(source = "user.id",        target = "userId")          //user.id means = pm.getUser().getId(),  (pm=projectMember)
     @Mapping(source = "user.username",     target = "username")      // Entity.user.email → DTO.email
     @Mapping(source = "user.name",      target = "name")       // Entity.user.name → DTO.name...
     @Mapping(source = "projectRole",    target = "role")
