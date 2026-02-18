@@ -1,9 +1,11 @@
 package com.priyansu.project.lovable_clone.controller;
 
+import com.priyansu.project.lovable_clone.dto.deploy.DeployResponse;
 import com.priyansu.project.lovable_clone.dto.project.ProjectRequest;
 import com.priyansu.project.lovable_clone.dto.project.ProjectResponse;
 import com.priyansu.project.lovable_clone.dto.project.ProjectSummeryResponse;
 import com.priyansu.project.lovable_clone.security.AuthUtil;
+import com.priyansu.project.lovable_clone.service.DeploymentService;
 import com.priyansu.project.lovable_clone.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final AuthUtil authUtil;
+    private final DeploymentService deploymentService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummeryResponse>> getMyProject(){
@@ -51,6 +54,11 @@ public class ProjectController {
 
        projectService.softDelete(id);
        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/deploy")
+    public ResponseEntity<DeployResponse> deployProject(@PathVariable Long id) {
+        return ResponseEntity.ok(deploymentService.deploy(id));
     }
 
 
