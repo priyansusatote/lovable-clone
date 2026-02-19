@@ -18,6 +18,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect   # Hibernate dialect for PostgreSQL
         format_sql: true    # Pretty-print SQL output (NOTE: Correct spelling is format_sql)
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   ai:
     openai:
       api-key: ${LOVABLE_OPENROUTER_API_KEY}

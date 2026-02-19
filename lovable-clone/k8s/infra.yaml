@@ -51,7 +51,7 @@ spec:
 ---
 
 apiVersion: v1
-kind: Service
+kind: Service    #service : to expose redis port:6379
 metadata:
   name: redis-service
   namespace: lovable-app
